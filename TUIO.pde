@@ -58,54 +58,68 @@ void updateTUIOobjts() {
 
       obj[j] = new PVector(tobj.getScreenX(width),tobj.getScreenY(height),tobj.getSymbolID());
 
-      player[j] = new Player(obj[j].x,obj[j].y,obj[j].z);
+      player[j] = new Player(obj[j].x,obj[j].y,obj[j].z,tobj.getAngle(),j);
      
       //      tuioObjetsToBalls(obj[i]); //////////////////////////
       for (int i = 0; i < numBalls; i++) {
-        float dx = balls[i].x - obj[j].x;
-        float dy = balls[i].y - obj[j].y;
+        float dx = balls[i].x - player[j].x;
+        float dy = balls[i].y - player[j].y;
         float distance = sqrt(dx*dx + dy*dy);
 
         float minDist = balls[i].realDiameter/2 + obj_lupa/2;
-        float minDist2 = balls[i].realDiameter/2 + obj_player/2;
-
-        if (distance < minDist && distance > minDist2 ) { 
-
-          balls[i].lupaSize=2;
-
-          float angle = atan2(dy, dx);
-          float targetX = obj[j].x + cos(angle) * minDist2;
-          float targetY = obj[j].y + sin(angle) * minDist2;
-
-          balls[i].x = targetX;
-          balls[i].y = targetY;
+        float minDist2 = balls[i].realDiameter/2 + (obj_player+objStroke)/2;
+///LUPA FUNCIONA MAL Y TRABA TODO
+//        if (distance < minDist && distance > minDist2+3 ) { 
+//
+//          balls[i].lupaSize=2;
+//
+//          float angle = atan2(dy, dx);
+//          float targetX = obj[j].x + cos(angle) * minDist2;
+//          float targetY = obj[j].y + sin(angle) * minDist2;
+//
+//          balls[i].x = targetX;
+//          balls[i].y = targetY;
+//        }
+        
+       
+        ///////CATCHHHH BALLL 
+        if (distance < minDist2 && player[j].free) {
+         balls[i].linkedTo=player[j].objID;
+         balls[i].idToPd=player[j].idTopd;
+         balls[i].rot=player[j].rot;
+         println(tobj.getAngle());
+         player[j].free=false;
+         balls[i].linked=true;
+         player[j].linked=true;
+        
+         player[j].cantch(balls[i].uri,balls[i].id);
+         player[j].linkedToBall= balls[i].id;
         }
         
-        ///////CATCHHHH BALLL 
-        if (distance < minDist2 && balls[i].ON && !player[j].linked) {
-          balls[i].ON=true;
-          player[j].linked=true;
-          player[j].cantch(balls[i].uri);
-          player[j].col=balls[i].col;
-          }
         
+        if(player[j].objID == balls[i].linkedTo && distance > minDist2)balls[i].linked=false;
+
+        
+        if(player[j].linkedToBall==balls[i].id && balls[i].linked && player[j].linked){
+        balls[i].update(player[j].x,player[j].y);
+        }
       }
-      
+       //player[j].send(tobj.getAngle());
        player[j].display();
+     
       /////////////////////////////////////////////////////////////////////////
 
-      ///TUIO displai
+      ///TUIO display
       strokeWeight(objStroke);
       //float a = atan2(width/2-tobj.getScreenX(width),height/2-tobj.getScreenY(height));
 
       noFill();
-      stroke(0,0,0,155);
+      stroke(0,0,0,50);
 
       ellipse(obj[j].x,obj[j].y,obj_lupa,obj_lupa);
     
       noStroke();
       fill(0,100);
-
       ellipse(obj[j].x,obj[j].y,obj_size,obj_size);
     }
   }
@@ -114,17 +128,17 @@ void updateTUIOobjts() {
 void addTuioObject(TuioObject tobj) {
 }
 void updateTuioObject(TuioObject tobj) {
-  for (int i = 0; i < numBalls; i++) {
-    if(recorded && !balls[i].ON)balls[i].x=ballMemoryPos[i].x;
-    if(recorded && !balls[i].ON)balls[i].y=ballMemoryPos[i].y;
-    balls[i].lupaSize=1;
-  }
+//  for (int i = 0; i < player.length; i++) {
+//  if(tobj.getSymbolID()==player[i].objID)player[i].updateFromTuio(tobj.getAngle());
+//  
+//  }
 }
 void removeTuioObject(TuioObject tobj) {
 }
 void addTuioCursor(TuioCursor tcur) {
 }
 void updateTuioCursor(TuioCursor tcur) {
+  
 }
 void removeTuioCursor(TuioCursor tcur) {
 

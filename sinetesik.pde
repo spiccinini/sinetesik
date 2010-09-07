@@ -11,14 +11,14 @@ void setup() {
   smooth();
 
   initTableClass();  //levanta valores del tsv
-  numBalls = 1000;
+  numBalls = rowCount;
   ballMemoryPos = new PVector [rowCount];
 
   balls =  new Ball[numBalls];
   ///crate balls!
-
+  String pepe = "/Users/lf/Dropbox/Documentos/mediaLab/materiales/fullTracks/1.wav" ;
   for (int i = 0; i < numBalls; i++) {
-    balls[i] = new Ball(0, 0, random(5, 9), i, balls, locationTable.getString(i, 0), locationTable.getFloat(i, 1), ((locationTable.getFloat(i, 2))*7)%11);
+    balls[i] = new Ball(0, 0, random(5, 9), i, balls, pepe, locationTable.getFloat(i, 1), ((locationTable.getFloat(i, 2))*7)%11);
   }
 
   for (int i = 0; i < numBalls; i++) {
@@ -28,8 +28,9 @@ void setup() {
     float angle = radians(360*(balls[i].tonica/11)+bpmCorrect);
     balls[i].update(radio * cos(angle) + width/2, radio * sin(angle) + height/2);
   }
-
+  //initOSC();
   initTUIO();
+
 }
 
 void draw() {
@@ -43,9 +44,10 @@ void draw() {
   for (int i = 0; i < numBalls; i++) {
     balls[i].calculos();
     balls[i].collide();
-   
-    //balls[i].borders(); 
+//    balls[i].borders(); 
+    //balls[i].send();
     balls[i].display();
+     
 
   }
 
@@ -55,9 +57,6 @@ void draw() {
 
   if(bordersReference) bordes();
     
-  
-
-
   if((frameCount==16)||(keyPressed && key=='r'))recPoss();
     //println(frameRate);
 }

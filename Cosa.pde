@@ -31,8 +31,25 @@ class Ball {
   float curId;
 
   //
-  boolean draggable = false;
+
   boolean linked = false;
+  float linkedTo;
+
+
+  ////funciones para OSC
+  float rot;
+  float savedRot;
+
+  float playStop;
+  float savedPlayStop;
+  float idToPd;
+  
+  float distance = 0;
+  float savedDistance;
+  
+ 
+ String savedUri;
+
 
   Ball(float xin, float yin, float din, int idin, Ball[] oin, String uriIn, float bpmIn, float tonicaIn) {
     x = xin;
@@ -52,13 +69,14 @@ class Ball {
     pulseUpDown = 0.01;
   } 
 
+
+
   void collide() {
     realDiameter = diameter*sizeOnOff;
     if(colide) {
-      for (int i = 0; i < others.length; i++) {
+      for (int i = 0; i < numBalls; i++) {
         if (i == id)
           {continue;}
-
         float dx = others[i].x - x;
         float dy = others[i].y - y;
         float distance = sqrt(dx*dx + dy*dy);
@@ -74,13 +92,14 @@ class Ball {
             continue;
           }
           else if(!others[i].ON){
-            others[i].x = others[i].x + moveX/2 + minDist/100;
-            others[i].y = others[i].y + moveY/2 + minDist/100;
-            x =  x - cos(angle) * moveX/2 - minDist/100;
-            y = y - sin(angle) * moveY/2 - minDist/100;
+            others[i].x = others[i].x + moveX/4 + minDist/100;
+            others[i].y = others[i].y + moveY/4 + minDist/100;
+            x =  x - cos(angle) * moveX/4 - minDist/100;
+            y = y - sin(angle) * moveY/4 - minDist/100;
           }
 
         }
+        
         if(curId == others[i].curId && ON && others[i].ON)others[i].ON=false;///MMM maomeno
       }
     }
@@ -117,17 +136,21 @@ class Ball {
     if(tonica != -7)satuCorrect=1;
 
     if(!ON) {
+      lupaSize=1;
+
+      if(linked)lupaSize=obj_player/diameter;
+      if(!linked)lupaSize=1;
       sizeOnOff=lupaSize;
-      col=color(tonica, 160*satuCorrect, 140*satuCorrect,50+(pulse*100));
+      col=color(tonica, 160*satuCorrect, 110,75+(pulse*100));
     }
-    else {
+    if(ON) {
+      if(!linked)lupaSize=1;
       sizeOnOff=4;
       col=color(tonica, 200*satuCorrect, 140,(150+pulse*105));
     }
   }
 
   void display() {
-
     noStroke();
     fill(col);
     ellipse(x, y, realDiameter, realDiameter);
@@ -146,6 +169,50 @@ class Ball {
     } 
     else if (y - diameter/2 < 0) {
       y = realDiameter/2;
+    }
+  }
+
+  void send() {
+    if(!linked)playStop=0;
+
+    if(linked)playStop= 1;
+
+   
+    ///URI DEL ARCHIVO QUE REPRESENTA LA CELDA
+    if(savedUri!=uri && playStop==1) { 
+      OscMessage myOscMessage =  new OscMessage("/celda");
+      myOscMessage.add(idToPd); //ID de CELDa
+      myOscMessage.add(0);// ID del mensaje/parametro 
+      myOscMessage.add(uri);//mensaje/parametro
+      oscP5.send(myOscMessage, myBroadcastLocation);
+      savedUri = uri;
+    }
+    if(savedRot!=rot && playStop==1) {
+      OscMessage myOscMessage =  new OscMessage("/celda");
+      myOscMessage.add(idToPd); //ID de CELDa
+      myOscMessage.add(1); // ID del mensaje/parametro
+      myOscMessage.add(map(degrees(rot),0,360,-2,2));//mensaje/parametro
+      oscP5.send(myOscMessage, myBroadcastLocation);
+      savedRot = rot;
+    }
+            //DISTANCIA DEL OBJETO A LA CELDA
+        if(savedDistance!=distance && playStop==1) { 
+          distance = 0.5;
+          OscMessage myOscMessage =  new OscMessage("/celda");
+          myOscMessage.add(idToPd); //ID de CELDa
+          myOscMessage.add(2);//mensaje/parametro
+          myOscMessage.add(distance);//mensaje/parametro
+          oscP5.send(myOscMessage, myBroadcastLocation);
+          savedDistance=distance;
+        }
+  
+     if(playStop!=savedPlayStop) {
+      OscMessage myOscMessage =  new OscMessage("/celda");
+      myOscMessage.add(idToPd); //ID de CELDa
+      myOscMessage.add(3);// ID del mensaje/parametro 
+      myOscMessage.add(playStop);//mensaje/parametro APAGADO!
+      oscP5.send(myOscMessage, myBroadcastLocation);
+      savedPlayStop=playStop;
     }
   }
 }

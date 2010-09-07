@@ -17,7 +17,10 @@ void init(){
  
 }
 public void stop() {
-
+//OscMessage myOscMessage2 =  new OscMessage("/masters");
+//        //myOscMessage.add(1);// ID del mensaje/parametro 
+//        myOscMessage2.add(0);//mensaje/parametro APAGADO!
+//        oscP5.send(myOscMessage2, myBroadcastLocation);
 
   super.stop();
 }
